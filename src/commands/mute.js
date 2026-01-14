@@ -61,14 +61,36 @@ module.exports = {
             return message.reply(getRandomInvalidUsage('mute'));
         }
 
+        // get user from mentions (ignore reply mentions)
+        let targetUser = null;
+        let repliedUserId = null;
+        
+        // If message is a reply, get the replied user ID to exclude it
+        if (message.reference && message.reference.messageId) {
+            try {
+                const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
+                repliedUserId = repliedMessage.author.id;
+            } catch (error) {
+                // If we can't fetch the replied message, continue without filtering
+            }
+        }
+        
+        // Get mentions, excluding the replied user if it's a reply
+        const allMentions = message.mentions.members;
+        if (repliedUserId && allMentions.size > 1) {
+            // Filter out the replied user
+            targetUser = allMentions.find(member => member.id !== repliedUserId) || null;
+        } else if (repliedUserId && allMentions.size === 1 && allMentions.first().id === repliedUserId) {
+            // Only the replied user is mentioned, that's not valid
+            targetUser = null;
+        } else {
+            targetUser = allMentions.first();
+        }
+        
         // check if bot is mentioned
-        const mentionedUser = message.mentions.users.first();
-        if (mentionedUser && mentionedUser.id === message.client.user.id) {
+        if (targetUser && targetUser.id === message.client.user.id) {
             return message.reply(getRandomBotSanction('mute'));
         }
-
-        // get user
-        const targetUser = message.mentions.members.first();
         
         if (!targetUser) {
             return message.reply(getRandomUserNotFound());
