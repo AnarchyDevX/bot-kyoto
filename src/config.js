@@ -7,7 +7,6 @@ module.exports = {
     highRankRoleId: '1456742024689619066',
     muteRoleName: 'Muted',
     maxMuteDuration: 60 * 60 * 1000,
-    maxTimeoutDuration: 10 * 60 * 1000,
+    maxTimeoutDuration: 10 * 60 * 1000, 
     fullPermissionUserIds: ['685552160594723015'],
-    protectedUserId: '685552160594723015',
 };
