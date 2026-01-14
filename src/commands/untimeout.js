@@ -9,7 +9,7 @@ module.exports = {
         const { hasWhitelistedRole } = require('../utils/whitelist');
         const { getRandomNoPermission, getRandomWrongChannel, getRandomError, getRandomUserNotFound, getRandomBotPermission, getRandomInvalidUsage, getRandomNotTimeouted } = require('../utils/messages');
         
-        const { hasFullPermissions } = require('../utils/whitelist');
+        const { hasFullPermissions, isHighRank } = require('../utils/whitelist');
         
         // check full permissions first
         const hasFullPerms = hasFullPermissions(message.author.id);
@@ -17,7 +17,7 @@ module.exports = {
         // check perm user
         const hasPermission = message.member.permissions.has([PermissionFlagsBits.ModerateMembers, PermissionFlagsBits.Administrator]);
         const hasWhitelist = hasWhitelistedRole(message.member);
-        const isHighRank = message.member.roles.cache.has(config.highRankRoleId) || hasFullPerms;
+        const isHighRankMember = isHighRank(message.member) || hasFullPerms;
         const isStaff = hasPermission || hasWhitelist || hasFullPerms;
         
         if (!isStaff) {
@@ -25,7 +25,7 @@ module.exports = {
         }
 
         // check channel
-        if (!isHighRank && message.channel.id !== config.punitionsChannelId) {
+        if (!isHighRankMember && message.channel.id !== config.punitionsChannelId) {
             return message.reply(getRandomWrongChannel('untimeout'));
         }
 

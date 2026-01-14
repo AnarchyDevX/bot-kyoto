@@ -114,6 +114,24 @@ function hasFullPermissions(userId) {
     return config.fullPermissionUserIds && config.fullPermissionUserIds.includes(userId);
 }
 
+// check if member has a role above or equal to highRankRoleId
+function isHighRank(member) {
+    const config = require('../config');
+    if (!config.highRankRoleId) return false;
+    
+    const highRankRole = member.guild.roles.cache.get(config.highRankRoleId);
+    if (!highRankRole) return false;
+    
+    // Check if member has the exact role
+    if (member.roles.cache.has(config.highRankRoleId)) {
+        return true;
+    }
+    
+    // Check if member has any role with higher position
+    const memberHighestRole = member.roles.highest;
+    return memberHighestRole.position > highRankRole.position;
+}
+
 module.exports = {
     addRole,
     removeRole,
@@ -122,4 +140,5 @@ module.exports = {
     canSanction,
     loadWhitelist,
     hasFullPermissions,
+    isHighRank,
 };

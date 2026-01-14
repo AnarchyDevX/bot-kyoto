@@ -19,9 +19,11 @@ module.exports = {
             return message.reply(getRandomNoPermission('wllist', false));
         }
 
+        const { isHighRank } = require('../utils/whitelist');
+        
         // check channel
-        const isHighRank = message.member.roles.cache.has(config.highRankRoleId);
-        if (!isHighRank && message.channel.id !== config.punitionsChannelId) {
+        const isHighRankMember = isHighRank(message.member);
+        if (!isHighRankMember && message.channel.id !== config.punitionsChannelId) {
             return message.reply(getRandomWrongChannel('wllist'));
         }
 
