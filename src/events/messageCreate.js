@@ -1,4 +1,5 @@
 const config = require('../config');
+const { PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
     name: 'messageCreate',
@@ -35,7 +36,7 @@ module.exports = {
 async function handleSmashOrPassChannel(message) {
     try {
         // check bot perm
-        if (!message.channel.permissionsFor(message.guild.members.me).has(['MANAGE_MESSAGES', 'ADD_REACTIONS', 'CREATE_PUBLIC_THREADS'])) {
+        if (!message.channel.permissionsFor(message.guild.members.me).has(['MANAGE_MESSAGES', 'ADD_REACTIONS', 'CREATE_PUBLIC_THREADS', 'MANAGE_THREADS'])) {
             return;
         }
 
@@ -71,26 +72,21 @@ async function handleSmashOrPassChannel(message) {
             // Ensure everyone can send messages in the thread
             try {
                 // Wait a bit for thread to be fully created
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                // Set permissions for @everyone to allow sending messages
+                // Get the everyone role
                 const everyoneRole = message.guild.roles.everyone;
-                await thread.permissionOverwrites.create(everyoneRole, {
-                    SendMessages: true,
-                    ViewChannel: true,
-                    SendMessagesInThreads: true,
-                });
+                
+                // Use set to force permissions (removes any existing denies)
+                await thread.permissionOverwrites.set([
+                    {
+                        id: everyoneRole.id,
+                        allow: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessagesInThreads],
+                        deny: [],
+                    }
+                ], { reason: 'Permettre à tout le monde de parler dans le thread' });
             } catch (error) {
-                // If create fails, try edit
-                try {
-                    await thread.permissionOverwrites.edit(message.guild.roles.everyone, {
-                        SendMessages: true,
-                        ViewChannel: true,
-                        SendMessagesInThreads: true,
-                    });
-                } catch (editError) {
-                    console.error('Erreur lors de la configuration des permissions du thread:', editError);
-                }
+                console.error('Erreur lors de la configuration des permissions du thread:', error);
             }
         } catch (error) {
             console.error('Erreur lors de l\'ajout des réactions ou création du thread:', error);
