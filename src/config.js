@@ -3,7 +3,8 @@ module.exports = {
     prefix: '&',
     logChannelId: '1458983245138890752', 
     smashOrPassChannelId: '1456770973088092415',
-    punitionsChannelId: '1460802671647784961',
+    punitionsChannelId: '1460802671647784961', // deprecated, utiliser punitionsChannelName
+    punitionsChannelName: '⛔・punitions',
     highRankRoleId: '1456742024689619066',
     muteRoleName: 'Muted',
     maxMuteDuration: 60 * 60 * 1000,

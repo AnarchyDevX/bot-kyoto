@@ -19,7 +19,7 @@ module.exports = {
             return message.reply(getRandomNoPermission('unlock', false));
         }
 
-        if (!isHighRankMember && message.channel.id !== config.punitionsChannelId) {
+        if (!isHighRankMember && message.channel.name !== config.punitionsChannelName) {
             return message.reply(getRandomWrongChannel('unlock'));
         }
 

@@ -53,7 +53,7 @@ module.exports = {
             return message.reply(getRandomNoPermission('slowmode', false));
         }
 
-        if (!isHighRankMember && message.channel.id !== config.punitionsChannelId) {
+        if (!isHighRankMember && message.channel.name !== config.punitionsChannelName) {
             return message.reply(getRandomWrongChannel('slowmode'));
         }
 

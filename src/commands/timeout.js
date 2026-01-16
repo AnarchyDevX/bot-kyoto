@@ -38,7 +38,7 @@ module.exports = {
         }
 
         // check channel
-        if (!isHighRankMember && message.channel.id !== config.punitionsChannelId) {
+        if (!isHighRankMember && message.channel.name !== config.punitionsChannelName) {
             return message.reply(getRandomWrongChannel('timeout'));
         }
 
