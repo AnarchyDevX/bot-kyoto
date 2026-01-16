@@ -98,6 +98,18 @@ async function handleSmashOrPassChannel(message) {
                     ReadMessageHistory: true,
                 }, { reason: 'Permettre à tout le monde de parler dans le thread' });
                 
+                // Apply Muted role permissions in thread
+                const muteRole = message.guild.roles.cache.find(role => role.name === config.muteRoleName);
+                if (muteRole) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await fetchedThread.permissionOverwrites.create(muteRole, {
+                        SendMessages: false,
+                        SendMessagesInThreads: false,
+                        AddReactions: false,
+                        Speak: false,
+                    }, { reason: 'Bloquer les membres mutés dans le thread' });
+                }
+                
                 console.log(`✅ Permissions configurées pour le thread: ${fetchedThread.name}`);
             } catch (error) {
                 console.error('Erreur lors de la configuration des permissions du thread:', error);
@@ -110,6 +122,18 @@ async function handleSmashOrPassChannel(message) {
                         SendMessagesInThreads: true,
                         ReadMessageHistory: true,
                     }, { reason: 'Fallback: Permettre à tout le monde de parler' });
+                    
+                    // Apply Muted role permissions in thread (fallback)
+                    const muteRole = message.guild.roles.cache.find(role => role.name === config.muteRoleName);
+                    if (muteRole) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        await thread.permissionOverwrites.edit(muteRole, {
+                            SendMessages: false,
+                            SendMessagesInThreads: false,
+                            AddReactions: false,
+                            Speak: false,
+                        }, { reason: 'Fallback: Bloquer les membres mutés dans le thread' });
+                    }
                 } catch (fallbackError) {
                     console.error('Erreur lors de la méthode fallback:', fallbackError);
                 }

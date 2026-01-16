@@ -73,6 +73,21 @@ module.exports = {
                             value: 'Définit un rôle admin pour gérer les whitelists',
                             inline: true,
                         },
+                        {
+                            name: '🔒 &lock',
+                            value: 'Verrouille le channel actuel',
+                            inline: true,
+                        },
+                        {
+                            name: '🔓 &unlock',
+                            value: 'Déverrouille le channel actuel',
+                            inline: true,
+                        },
+                        {
+                            name: '⏱️ &slowmode <sec> <durée>',
+                            value: 'Active le slowmode (ex: `&slowmode 15 5m`)',
+                            inline: true,
+                        },
                     ],
                     footer: {
                         text: devUser ? `By ${devUser.tag}` : 'By 0xRynal',
