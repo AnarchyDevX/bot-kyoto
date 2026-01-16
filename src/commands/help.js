@@ -75,17 +75,17 @@ module.exports = {
                         },
                         {
                             name: '🔒 &lock',
-                            value: 'Verrouille le channel actuel',
+                            value: 'Verrouille le channel actuel (empêche @everyone d\'envoyer des messages)\nEx: `&lock`',
                             inline: true,
                         },
                         {
                             name: '🔓 &unlock',
-                            value: 'Déverrouille le channel actuel',
+                            value: 'Déverrouille le channel actuel (réautorise @everyone)\nEx: `&unlock`',
                             inline: true,
                         },
                         {
                             name: '⏱️ &slowmode <sec> <durée>',
-                            value: 'Active le slowmode (ex: `&slowmode 15 5m`)',
+                            value: 'Active le slowmode de X secondes pour une durée donnée\nEx: `&slowmode 15 5m` (15 sec pendant 5 min)',
                             inline: true,
                         },
                     ],

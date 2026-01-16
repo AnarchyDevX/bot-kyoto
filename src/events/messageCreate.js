@@ -78,65 +78,83 @@ async function handleSmashOrPassChannel(message) {
                 // Fetch the thread to ensure we have the latest data
                 const fetchedThread = await thread.fetch();
                 
+                if (!fetchedThread || !fetchedThread.permissionOverwrites) {
+                    console.error('Thread ou permissionOverwrites non disponible');
+                    return;
+                }
+                
                 // Get the everyone role
                 const everyoneRole = message.guild.roles.everyone;
                 
+                if (!everyoneRole) {
+                    console.error('Rôle @everyone non trouvé');
+                    return;
+                }
+                
                 // Check current permissions
-                const currentOverwrite = fetchedThread.permissionOverwrites.cache.get(everyoneRole.id);
+                const currentOverwrite = fetchedThread.permissionOverwrites.cache?.get(everyoneRole.id);
                 
                 // Remove any existing deny for @everyone first
                 if (currentOverwrite) {
-                    await fetchedThread.permissionOverwrites.delete(everyoneRole, { reason: 'Reset permissions pour @everyone' });
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    try {
+                        await fetchedThread.permissionOverwrites.delete(everyoneRole, { reason: 'Reset permissions pour @everyone' });
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    } catch (deleteError) {
+                        console.error('Erreur lors de la suppression des permissions:', deleteError);
+                    }
                 }
                 
-                // Create fresh permissions allowing everything
-                await fetchedThread.permissionOverwrites.create(everyoneRole, {
-                    ViewChannel: true,
-                    SendMessages: true,
-                    SendMessagesInThreads: true,
-                    ReadMessageHistory: true,
-                }, { reason: 'Permettre à tout le monde de parler dans le thread' });
+                // Create or edit permissions allowing everything
+                try {
+                    const existingEveryoneOverwrite = fetchedThread.permissionOverwrites.cache?.get(everyoneRole.id);
+                    if (existingEveryoneOverwrite) {
+                        await fetchedThread.permissionOverwrites.edit(everyoneRole, {
+                            ViewChannel: true,
+                            SendMessages: true,
+                            SendMessagesInThreads: true,
+                            ReadMessageHistory: true,
+                        }, { reason: 'Permettre à tout le monde de parler dans le thread' });
+                    } else {
+                        await fetchedThread.permissionOverwrites.create(everyoneRole, {
+                            ViewChannel: true,
+                            SendMessages: true,
+                            SendMessagesInThreads: true,
+                            ReadMessageHistory: true,
+                        }, { reason: 'Permettre à tout le monde de parler dans le thread' });
+                    }
+                } catch (permError) {
+                    console.error('Erreur lors de la configuration des permissions @everyone:', permError);
+                }
                 
                 // Apply Muted role permissions in thread
                 const muteRole = message.guild.roles.cache.find(role => role.name === config.muteRoleName);
                 if (muteRole) {
                     await new Promise(resolve => setTimeout(resolve, 500));
-                    await fetchedThread.permissionOverwrites.create(muteRole, {
-                        SendMessages: false,
-                        SendMessagesInThreads: false,
-                        AddReactions: false,
-                        Speak: false,
-                    }, { reason: 'Bloquer les membres mutés dans le thread' });
+                    try {
+                        const existingMuteOverwrite = fetchedThread.permissionOverwrites.cache?.get(muteRole.id);
+                        if (existingMuteOverwrite) {
+                            await fetchedThread.permissionOverwrites.edit(muteRole, {
+                                SendMessages: false,
+                                SendMessagesInThreads: false,
+                                AddReactions: false,
+                                Speak: false,
+                            }, { reason: 'Bloquer les membres mutés dans le thread' });
+                        } else {
+                            await fetchedThread.permissionOverwrites.create(muteRole, {
+                                SendMessages: false,
+                                SendMessagesInThreads: false,
+                                AddReactions: false,
+                                Speak: false,
+                            }, { reason: 'Bloquer les membres mutés dans le thread' });
+                        }
+                    } catch (muteError) {
+                        console.error('Erreur lors de la configuration des permissions Muted:', muteError);
+                    }
                 }
                 
                 console.log(`✅ Permissions configurées pour le thread: ${fetchedThread.name}`);
             } catch (error) {
                 console.error('Erreur lors de la configuration des permissions du thread:', error);
-                // Try alternative method
-                try {
-                    const everyoneRole = message.guild.roles.everyone;
-                    await thread.permissionOverwrites.edit(everyoneRole, {
-                        ViewChannel: true,
-                        SendMessages: true,
-                        SendMessagesInThreads: true,
-                        ReadMessageHistory: true,
-                    }, { reason: 'Fallback: Permettre à tout le monde de parler' });
-                    
-                    // Apply Muted role permissions in thread (fallback)
-                    const muteRole = message.guild.roles.cache.find(role => role.name === config.muteRoleName);
-                    if (muteRole) {
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                        await thread.permissionOverwrites.edit(muteRole, {
-                            SendMessages: false,
-                            SendMessagesInThreads: false,
-                            AddReactions: false,
-                            Speak: false,
-                        }, { reason: 'Fallback: Bloquer les membres mutés dans le thread' });
-                    }
-                } catch (fallbackError) {
-                    console.error('Erreur lors de la méthode fallback:', fallbackError);
-                }
             }
         } catch (error) {
             console.error('Erreur lors de l\'ajout des réactions ou création du thread:', error);
